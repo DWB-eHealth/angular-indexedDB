@@ -209,7 +209,7 @@
                                         d.reject(e.target.result);
                                     };
                                     req.onsuccess = function(e) {
-                                        if (i == data.length) {
+                                        if (i === data.length - 1) {
                                             d.resolve(e.target.result);
                                         }
                                     };
@@ -250,7 +250,7 @@
                                         d.reject(e.target.result);
                                     };
                                     req.onsuccess = function(e) {
-                                        if (i == data.length) {
+                                        if (i === data.length - 1) {
                                             d.resolve(e.target.result);
                                         }
                                     };
