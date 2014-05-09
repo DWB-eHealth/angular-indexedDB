@@ -161,12 +161,20 @@
                      * @returns {object} IDBObjectStore the objectstore in question
                      */
                     internalObjectStore: function(storeName, mode) {
+                        var broadcastAndCall = function(callback) {
+                            return function(e) {
+                                $rootScope.$broadcast('$transactionComplete', e);
+                                callback.call(this, e);
+                            };
+                        };
+
                         var me = this;
                         return dbPromise().then(function(db) {
                             me.transaction = db.transaction([storeName], mode || READONLY);
-                            me.transaction.oncomplete = module.onTransactionComplete;
-                            me.transaction.onabort = module.onTransactionAbort;
-                            me.onerror = module.onTransactionError;
+                            $rootScope.$broadcast('$transactionStarted', storeName);
+                            me.transaction.oncomplete = broadcastAndCall(module.onTransactionComplete);
+                            me.transaction.onabort = broadcastAndCall(module.onTransactionAbort);
+                            me.onerror = broadcastAndCall(module.onTransactionError);
 
                             return me.transaction.objectStore(storeName);
                         });
