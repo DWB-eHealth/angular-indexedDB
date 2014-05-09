@@ -208,6 +208,10 @@
                         return this.internalObjectStore(this.storeName, READWRITE).then(function(store) {
                             var req;
                             if (angular.isArray(data)) {
+                                if (data.length === 0) {
+                                    d.resolve();
+                                }
+
                                 data.forEach(function(item, i) {
                                     req = store.add(item);
                                     req.onnotify = function(e) {
@@ -249,6 +253,10 @@
                         return this.internalObjectStore(this.storeName, READWRITE).then(function(store) {
                             var req;
                             if (angular.isArray(data)) {
+                                if (data.length === 0) {
+                                    d.resolve();
+                                }
+
                                 data.forEach(function(item, i) {
                                     req = store.put(item);
                                     req.onnotify = function(e) {
