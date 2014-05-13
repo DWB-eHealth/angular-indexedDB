@@ -81,6 +81,11 @@
             return this;
         };
 
+        module.dbReady = function(callback) {
+            module.dbReadyCallback = callback;
+            return this;
+        };
+
         module.$get = ['$q', '$rootScope',
             function($q, $rootScope) {
                 /**
@@ -118,6 +123,8 @@
                         dbReq = indexedDB.open(module.dbName, module.dbVersion || 1);
                         dbReq.onsuccess = function(e) {
                             module.db = dbReq.result;
+                            if (module.dbReadyCallback)
+                                module.dbReadyCallback(e);
                             deferred.resolve(module.db);
                         };
                         dbReq.onblocked = module.onDatabaseBlocked;
