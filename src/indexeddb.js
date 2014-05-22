@@ -24,7 +24,7 @@
 
         /** predefined variables */
         module.dbName = '';
-        module.dbVersion = 1;
+        module.dbVersion = null;
         module.db = null;
         module.dbPromise = null;
 
@@ -120,7 +120,7 @@
                         deferred = $q.defer();
                         module.dbPromise = deferred.promise;
 
-                        dbReq = indexedDB.open(module.dbName, module.dbVersion || 1);
+                        dbReq = module.dbVersion ? indexedDB.open(module.dbName, module.dbVersion) : indexedDB.open(module.dbName);
                         dbReq.onsuccess = function(e) {
                             module.db = dbReq.result;
                             if (module.dbReadyCallback)
