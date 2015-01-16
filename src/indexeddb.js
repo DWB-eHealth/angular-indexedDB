@@ -30,13 +30,13 @@
 
         /** predefined callback functions, can be customized in angular.config */
         module.onTransactionComplete = function(e) {
-            console.log('Transaction completed.');
+            console.debug('Transaction completed.');
         };
         module.onTransactionAbort = function(e) {
-            console.log('Transaction aborted: ' + (e.target.webkitErrorMessage || e.target.error.message || e.target.errorCode));
+            console.error('Transaction aborted: ' + (e.target.webkitErrorMessage || e.target.error.message || e.target.errorCode));
         };
         module.onTransactionError = function(e) {
-            console.log('Transaction failed: ' + e.target.errorCode);
+            console.error('Transaction failed: ' + e.target.errorCode);
         };
         module.onDatabaseError = function(e) {
             alert("Database error: " + (e.target.webkitErrorMessage || e.target.errorCode));
@@ -400,7 +400,7 @@
                                     if (cursor) {
                                         results.push(cursor.value);
                                         cursor.
-                                        continue ();
+                                        continue();
                                     } else {
                                         d.resolve(results);
                                     }
@@ -442,7 +442,7 @@
                                 if (cursor) {
                                     results.push(cursor.value);
                                     cursor.
-                                    continue ();
+                                    continue();
                                 } else {
                                     d.resolve(results);
                                 }
