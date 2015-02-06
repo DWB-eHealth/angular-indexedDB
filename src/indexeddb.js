@@ -421,6 +421,7 @@
                      * returns an IDBCursor for further manipulation. See indexedDB documentation
                      * for details on this.
                      * https://developer.mozilla.org/en-US/docs/IndexedDB/Using_IndexedDB#Using_a_cursor
+                     * http://www.codeproject.com/Articles/744986/How-to-do-some-magic-with-indexedDB
                      *
                      * @params {object} options optional query parameters, see defaultQueryOptions
                      * and QueryBuilder for details
@@ -429,27 +430,53 @@
                     "each": function(options) {
                         var d = $q.defer();
                         return this.internalObjectStore(this.storeName, READWRITE).then(function(store) {
-                            var req;
+                            var req, keysToFilter;
                             var myOptions = options || defaultQueryOptions;
                             if (myOptions.useIndex) {
                                 req = store.index(myOptions.useIndex).openCursor(myOptions.keyRange, myOptions.direction);
                             } else {
                                 req = store.openCursor(myOptions.keyRange, myOptions.direction);
                             }
+
+                            keysToFilter = myOptions.keyFilter ? myOptions.keyFilter.sort() : undefined;
+
                             var results = [];
                             req.onsuccess = function(e) {
-                                var cursor = e.target.result;
-                                if (cursor) {
+                                var onfound = function() {
                                     results.push(cursor.value);
-                                    cursor.
-                                    continue();
-                                } else {
+                                    cursor.continue();
+                                };
+
+                                var onfinish = function() {
                                     d.resolve(results);
+                                };
+
+                                var cursor = e.target.result;
+                                if (!cursor) {
+                                    onfinish();
+                                    return;
+                                }
+
+                                if (!keysToFilter) {
+                                    onfound();
+                                } else {
+                                    var i = 0;
+                                    var key = cursor.key;
+                                    while (key > keysToFilter[i]) {
+                                        i++;
+                                        if (i === keysToFilter.length) {
+                                            onfinish();
+                                            return;
+                                        }
+                                    }
+                                    key === keysToFilter[i] ? onfound() : cursor.continue(keysToFilter[i]);
                                 }
                             };
+
                             req.onerror = function(e) {
                                 d.reject(e.target.result);
                             };
+
                             return d.promise;
                         });
                     }
@@ -463,7 +490,7 @@
                  * @description utility object to easily create IDBKeyRange for cursor queries
                  */
                 var QueryBuilder = function() {
-                    this.result = defaultQueryOptions;
+                    this.result = JSON.parse(JSON.stringify(defaultQueryOptions));
                 };
                 QueryBuilder.prototype = {
                     /**
@@ -596,6 +623,20 @@
                      */
                     "$index": function(indexName) {
                         this.result.useIndex = indexName;
+                        return this;
+                    },
+                    /**
+                     * @ngdoc method
+                     * @name QueryBuilder.$in
+                     * @function
+                     *
+                     * @description optionally specify the keys to be retrieved
+                     *
+                     * @params {array} keysToFilter keys that needs to be retrieved
+                     * @returns {object} this QueryBuilder, for chaining params
+                     */
+                    "$in": function(keys) {
+                        this.result.keyFilter = keys;
                         return this;
                     },
                     /**
