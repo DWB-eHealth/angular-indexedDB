@@ -414,6 +414,42 @@
                     },
                     /**
                      * @ngdoc method
+                     * @name ObjectStore.exists
+                     * @function
+                     *
+                     * @description returns if any results exists for the given query
+                     *
+                     * @params {object} options optional query parameters, see defaultQueryOptions
+                     * and QueryBuilder for details
+                     * @returns {boolean} boolean... true if results exists, else false
+                     */
+                    "exists": function(options) {
+                        var d = $q.defer();
+                        return this.internalObjectStore(this.storeName, READWRITE).then(function(store) {
+                            var req;
+                            var myOptions = options || defaultQueryOptions;
+                            if (myOptions.useIndex) {
+                                req = store.index(myOptions.useIndex).openCursor(myOptions.keyRange, myOptions.direction);
+                            } else {
+                                req = store.openCursor(myOptions.keyRange, myOptions.direction);
+                            }
+                            req.onsuccess = function(e) {
+                                var cursor = e.target.result;
+                                if (cursor) {
+                                    d.resolve(true);
+                                } else {
+                                    d.resolve(false);
+                                }
+                            };
+
+                            req.onerror = function(e) {
+                                d.resolve(false);
+                            };
+                            return d.promise;
+                        });
+                    },
+                    /**
+                     * @ngdoc method
                      * @name ObjectStore.each
                      * @function
                      *
